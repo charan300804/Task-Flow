@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, Boolean, DateTime, Enum as SQLEnum, ForeignKey, JSON
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from app.models.enums import JobType
@@ -9,10 +8,10 @@ from app.models.enums import JobType
 class Schedule(Base):
     __tablename__ = "schedules"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     job_type = Column(SQLEnum(JobType, name="schedule_job_type_enum"), nullable=False, default=JobType.GENERIC)
-    cron_expression = Column(String(100), nullable=False)  # e.g., "0 */6 * * *"
+    cron_expression = Column(String(100), nullable=False)
     payload = Column(JSON, nullable=False, default=dict)
     priority = Column(String(20), nullable=False, default="5")
     enabled = Column(Boolean, nullable=False, default=True)

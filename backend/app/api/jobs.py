@@ -1,6 +1,5 @@
 import math
 from typing import Optional, List
-from uuid import UUID
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Header
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,7 +28,7 @@ async def submit_job(
     Asynchronously submit a job to TaskFlow.
     1. Validates authentication & payload.
     2. Enforces Idempotency (if key provided).
-    3. Persists metadata in PostgreSQL.
+    3. Persists metadata in PostgreSQL / DB.
     4. Pushes job to Redis Priority Queue.
     5. Immediately returns job object without blocking execution.
     """
@@ -45,7 +44,7 @@ async def submit_job(
 
     now = datetime.now(timezone.utc)
     job = Job(
-        user_id=current_user.id,
+        user_id=str(current_user.id),
         job_type=job_in.job_type,
         payload=job_in.payload,
         priority=job_in.priority,
@@ -122,12 +121,12 @@ async def list_jobs(
 
 @router.get("/{job_id}", response_model=JobDetailResponse)
 async def get_job_detail(
-    job_id: UUID,
+    job_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Get full job detail including all attempt history."""
-    stmt = select(Job).options(selectinload(Job.attempts)).where(Job.id == job_id)
+    stmt = select(Job).options(selectinload(Job.attempts)).where(Job.id == str(job_id))
     res = await db.execute(stmt)
     job = res.scalar_one_or_none()
     if not job:
@@ -136,13 +135,13 @@ async def get_job_detail(
 
 @router.post("/{job_id}/cancel", response_model=JobResponse)
 async def cancel_job(
-    job_id: UUID,
+    job_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
     redis: Redis = Depends(get_redis)
 ):
     """Cancel a pending or queued job."""
-    stmt = select(Job).where(Job.id == job_id)
+    stmt = select(Job).where(Job.id == str(job_id))
     res = await db.execute(stmt)
     job = res.scalar_one_or_none()
     if not job:
@@ -159,13 +158,13 @@ async def cancel_job(
 
 @router.post("/{job_id}/retry", response_model=JobResponse)
 async def retry_job(
-    job_id: UUID,
+    job_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
     redis: Redis = Depends(get_redis)
 ):
     """Manually retry a failed or dead-lettered job."""
-    stmt = select(Job).where(Job.id == job_id)
+    stmt = select(Job).where(Job.id == str(job_id))
     res = await db.execute(stmt)
     job = res.scalar_one_or_none()
     if not job:
@@ -173,7 +172,7 @@ async def retry_job(
 
     job.status = JobStatus.QUEUED
     job.error_message = None
-    job.retry_count = 0  # Reset retry counter for manual retry
+    job.retry_count = 0
 
     queue_service = QueueService(redis)
     await queue_service.enqueue_job(
@@ -188,12 +187,12 @@ async def retry_job(
 
 @router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_job(
-    job_id: UUID,
+    job_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Delete job and associated attempt records."""
-    stmt = select(Job).where(Job.id == job_id)
+    stmt = select(Job).where(Job.id == str(job_id))
     res = await db.execute(stmt)
     job = res.scalar_one_or_none()
     if not job:

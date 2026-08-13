@@ -1,12 +1,12 @@
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 from app.models.enums import JobType
 
 class ScheduleCreate(BaseModel):
     job_type: JobType = JobType.GENERIC
-    cron_expression: str  # e.g., "0 */6 * * *"
+    cron_expression: str
     payload: Dict[str, Any] = {}
     priority: int = 5
     enabled: bool = True
@@ -18,8 +18,8 @@ class ScheduleUpdate(BaseModel):
     enabled: Optional[bool] = None
 
 class ScheduleResponse(BaseModel):
-    id: UUID
-    user_id: UUID
+    id: Union[UUID, str]
+    user_id: Union[UUID, str]
     job_type: JobType
     cron_expression: str
     payload: Dict[str, Any]

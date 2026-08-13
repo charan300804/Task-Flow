@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, Integer, DateTime, Enum as SQLEnum, ForeignKey, Index, Text
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from app.models.enums import JobStatus
@@ -9,8 +8,8 @@ from app.models.enums import JobStatus
 class JobAttempt(Base):
     __tablename__ = "job_attempts"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    job_id = Column(UUID(as_uuid=True), ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    job_id = Column(String(36), ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False, index=True)
     worker_id = Column(String(100), ForeignKey("workers.id", ondelete="SET NULL"), nullable=True, index=True)
     attempt_number = Column(Integer, nullable=False)
     started_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)

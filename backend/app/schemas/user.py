@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 from uuid import UUID
 from pydantic import BaseModel, EmailStr, ConfigDict
 from app.models.enums import UserRole
@@ -17,7 +17,7 @@ class UserLogin(BaseModel):
     password: str
 
 class UserResponse(UserBase):
-    id: UUID
+    id: Union[UUID, str]
     role: UserRole
     created_at: datetime
 

@@ -1,5 +1,4 @@
 from typing import AsyncGenerator, Optional
-from uuid import UUID
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,12 +25,7 @@ async def get_current_user(
     if not user_id_str:
         raise credentials_exception
 
-    try:
-        user_id = UUID(user_id_str)
-    except ValueError:
-        raise credentials_exception
-
-    stmt = select(User).where(User.id == user_id)
+    stmt = select(User).where(User.id == str(user_id_str))
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
     if not user:

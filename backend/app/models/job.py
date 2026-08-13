@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, Integer, DateTime, Enum as SQLEnum, ForeignKey, Index, Text, JSON
-from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from app.models.enums import JobStatus, JobType
@@ -9,11 +8,11 @@ from app.models.enums import JobStatus, JobType
 class Job(Base):
     __tablename__ = "jobs"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     job_type = Column(SQLEnum(JobType, name="job_type_enum"), nullable=False, default=JobType.GENERIC)
     payload = Column(JSON, nullable=False, default=dict)
-    priority = Column(Integer, nullable=False, default=5, index=True)  # 1 to 10
+    priority = Column(Integer, nullable=False, default=5, index=True)
     status = Column(SQLEnum(JobStatus, name="job_status_enum"), nullable=False, default=JobStatus.PENDING, index=True)
     scheduled_at = Column(DateTime(timezone=True), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False, index=True)

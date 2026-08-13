@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Union
 from uuid import UUID
 from pydantic import BaseModel, Field, ConfigDict
 from app.models.enums import JobStatus, JobType
@@ -14,7 +14,7 @@ class JobCreate(BaseModel):
     idempotency_key: Optional[str] = None
 
 class JobAttemptResponse(BaseModel):
-    id: UUID
+    id: Union[UUID, str]
     worker_id: Optional[str] = None
     attempt_number: int
     started_at: datetime
@@ -26,8 +26,8 @@ class JobAttemptResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class JobResponse(BaseModel):
-    id: UUID
-    user_id: UUID
+    id: Union[UUID, str]
+    user_id: Union[UUID, str]
     job_type: JobType
     payload: Dict[str, Any]
     priority: int

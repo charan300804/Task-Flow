@@ -157,7 +157,7 @@ class WorkerDaemon:
                 return
 
             # 2. Load job from DB
-            job = db.query(Job).filter(Job.id == uuid.UUID(job_id_str)).first()
+            job = db.query(Job).filter(Job.id == str(job_id_str)).first()
             if not job or job.status in [JobStatus.SUCCESS.value, JobStatus.CANCELLED.value]:
                 logger.info(f"Job {job_id_str} is invalid or already finished/cancelled. Skipping.")
                 self.queue_service.ack_job(self.worker_id, raw_job)
@@ -226,7 +226,7 @@ class WorkerDaemon:
             logger.error(f"Job {job_id_str} FAILED: {err_msg}")
 
             try:
-                job = db.query(Job).filter(Job.id == uuid.UUID(job_id_str)).first()
+                job = db.query(Job).filter(Job.id == str(job_id_str)).first()
                 worker = db.query(Worker).filter(Worker.id == self.worker_id).first()
 
                 if job:
