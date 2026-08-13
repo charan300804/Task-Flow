@@ -22,7 +22,7 @@ class DistributedLock:
         self.token = str(uuid.uuid4())
         self.acquired = False
 
-    def acquire((self) -> bool:
+    def acquire(self) -> bool:
         """Attempt to acquire distributed lock."""
         res = self.redis.set(self.key, self.token, nx=True, px=self.timeout_ms)
         self.acquired = bool(res)
