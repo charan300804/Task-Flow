@@ -68,6 +68,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: taskflow-backend:latest
     container_name: taskflow-backend
     restart: always
     environment:
@@ -97,9 +98,7 @@ services:
         condition: service_healthy
 
   scheduler:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: taskflow-backend:latest
     container_name: taskflow-scheduler
     restart: always
     command: python app/scheduler/monitor.py
@@ -116,9 +115,7 @@ services:
         condition: service_started
 
   worker-1:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: taskflow-backend:latest
     container_name: taskflow-worker-1
     restart: always
     command: python app/workers/daemon.py --worker-id worker-node-1 --capabilities generic,python_task,ml_prediction,data_processing
@@ -140,9 +137,7 @@ services:
         condition: service_started
 
   worker-2:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: taskflow-backend:latest
     container_name: taskflow-worker-2
     restart: always
     command: python app/workers/daemon.py --worker-id worker-node-2 --capabilities generic,python_task,ml_prediction
@@ -164,9 +159,7 @@ services:
         condition: service_started
 
   worker-3:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: taskflow-backend:latest
     container_name: taskflow-worker-3
     restart: always
     command: python app/workers/daemon.py --worker-id worker-node-3 --capabilities generic,data_processing
