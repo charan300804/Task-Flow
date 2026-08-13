@@ -1,12 +1,11 @@
 # TaskFlow — Distributed Job Processing & ML Task Scheduler
 
-[![TaskFlow CI Pipeline](https://github.com/your-username/taskflow/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/taskflow/actions/workflows/ci.yml)
-[![Python 3.12](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110.0-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=black)](https://reactjs.org)
-[![Docker Compose](https://img.shields.io/badge/Docker_Compose-Multi--Worker-2496ED?style=flat&logo=docker&logoColor=white)](https://docker.com)
+[![TaskFlow CI](https://github.com/charan300804/Task-Flow/actions/workflows/ci.yml/badge.svg)](https://github.com/charan300804/Task-Flow/actions)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
+[![React 18](https://img.shields.io/badge/React-18-61DAFB.svg)](https://reactjs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-TaskFlow is a production-grade **Distributed Job Execution Platform & Machine Learning Task Scheduler**.
+TaskFlow is a production-grade, fault-tolerant distributed job processing platform and machine learning task scheduler built with **FastAPI**, **Redis**, **PostgreSQL**, **MinIO (S3)**, and **React + TypeScript**.
 
 It allows users and microservices to submit computational workloads asynchronously via a high-performance REST API. Jobs are enqueued into a **multi-queue Redis architecture**, checked out by **stateless background worker daemons** using **priority scheduling** and **distributed locks**, processed concurrently, monitored via **worker heartbeats**, automatically retried with **exponential backoff**, and persisted in **PostgreSQL** and **MinIO Object Storage**.
 
