@@ -18,37 +18,42 @@ logger = logging.getLogger("TaskFlowAPI")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Create tables if not exist
-    async with async_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    logger.info("Database tables initialized successfully.")
+    # Startup: Create tables if DB reachable
+    try:
+        async with async_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database tables initialized successfully.")
 
-    # Seed default Admin and User if empty
-    async with AsyncSessionLocal() as db:
-        res = await db.execute(select(User).where(User.email == "admin@taskflow.io"))
-        if not res.scalar_one_or_none():
-            admin_user = User(
-                name="Admin User",
-                email="admin@taskflow.io",
-                hashed_password=get_password_hash("admin123"),
-                role=UserRole.ADMIN
-            )
-            demo_user = User(
-                name="Demo User",
-                email="user@taskflow.io",
-                hashed_password=get_password_hash("user123"),
-                role=UserRole.USER
-            )
-            db.add(admin_user)
-            db.add(demo_user)
-            await db.commit()
-            logger.info("Seeded default users: admin@taskflow.io / admin123, user@taskflow.io / user123")
+        # Seed default Admin and User if empty
+        async with AsyncSessionLocal() as db:
+            res = await db.execute(select(User).where(User.email == "admin@taskflow.io"))
+            if not res.scalar_one_or_none():
+                admin_user = User(
+                    name="Admin User",
+                    email="admin@taskflow.io",
+                    hashed_password=get_password_hash("admin123"),
+                    role=UserRole.ADMIN
+                )
+                demo_user = User(
+                    name="Demo User",
+                    email="user@taskflow.io",
+                    hashed_password=get_password_hash("user123"),
+                    role=UserRole.USER
+                )
+                db.add(admin_user)
+                db.add(demo_user)
+                await db.commit()
+                logger.info("Seeded default users.")
+    except Exception as e:
+        logger.warning(f"Database setup during startup skipped or offline: {e}")
 
     yield
 
-    # Shutdown
-    await async_engine.dispose()
-    logger.info("Database pool closed gracefully.")
+    try:
+        await async_engine.dispose()
+        logger.info("Database pool closed gracefully.")
+    except Exception:
+        pass
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
