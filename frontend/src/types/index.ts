@@ -40,6 +40,16 @@ export interface JobAttempt {
   execution_time_ms?: number;
 }
 
+export interface JobCreate {
+  job_type: JobType;
+  priority?: number;
+  payload?: Record<string, any>;
+  max_retries?: number;
+  timeout_seconds?: number;
+  scheduled_at?: string;
+  idempotency_key?: string;
+}
+
 export interface Job {
   id: string;
   user_id: string;
@@ -70,6 +80,14 @@ export interface WorkerNode {
   jobs_completed: number;
   jobs_failed: number;
   started_at: string;
+}
+
+export interface ScheduleCreate {
+  job_type: JobType;
+  cron_expression: string;
+  payload?: Record<string, any>;
+  priority?: number;
+  enabled?: boolean;
 }
 
 export interface Schedule {

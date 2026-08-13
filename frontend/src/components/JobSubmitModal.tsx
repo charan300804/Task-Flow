@@ -18,7 +18,7 @@ export const JobSubmitModal: React.FC<JobSubmitModalProps> = ({
   const [priority, setPriority] = useState<number>(5);
   const [maxRetries, setMaxRetries] = useState<number>(3);
   const [timeoutSeconds, setTimeoutSeconds] = useState<number>(300);
-  const [idempotencyKey, setIdempotencyKey] = useState<str>('');
+  const [idempotencyKey, setIdempotencyKey] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

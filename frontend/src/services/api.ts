@@ -20,7 +20,7 @@ api.interceptors.request.use((config) => {
 });
 
 export const authApi = {
-  login: async (username: string, password: str) => {
+  login: async (username: string, password: string) => {
     const formData = new URLSearchParams();
     formData.append('username', username);
     formData.append('password', password);

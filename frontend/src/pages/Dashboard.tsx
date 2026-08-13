@@ -10,7 +10,7 @@ import {
 import { metricsApi, jobsApi, workersApi } from '../services/api';
 import { SystemMetricsResponse, Job, WorkerNode } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
-import { Link } from 'react_router_dom';
+import { Link } from 'react-router-dom';
 
 const STATUS_COLORS: Record<string, string> = {
   SUCCESS: '#10B981',
