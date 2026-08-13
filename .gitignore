@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+ENV/
+env/
+.pytest_cache/
+*.joblib
+ml/datasets/
+artifact_storage/
+
+# Node / React
+node_modules/
+dist/
+.vite/
+
+# Environment & Secrets
+.env
+*.log
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
