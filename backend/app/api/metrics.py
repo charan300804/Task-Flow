@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,7 +18,7 @@ from app.core.redis import get_redis
 from app.services.queue_service import QueueService
 from app.models import Job, Worker, JobAttempt, JobStatus, JobType, WorkerStatus, User
 from app.schemas.metrics import OverviewMetrics, SystemMetricsResponse
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user_optional
 
 router = APIRouter(prefix="/api/metrics", tags=["Metrics"])
 
@@ -32,15 +32,23 @@ if HAS_PROMETHEUS:
 
 @router.get("/overview", response_model=SystemMetricsResponse)
 async def get_overview_metrics(
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
     redis: Redis = Depends(get_redis)
 ):
     """Retrieve overview metrics for dashboard monitoring."""
-    # 1. Status counts query
-    status_stmt = select(Job.status, func.count(Job.id)).group_by(Job.status)
-    status_res = await db.execute(status_stmt)
-    status_map = {row[0].value if hasattr(row[0], 'value') else str(row[0]): row[1] for row in status_res.all()}
+    status_map = {}
+    worker_map = {}
+    avg_dur = 0.0
+    type_distribution = []
+
+    try:
+        # 1. Status counts query
+        status_stmt = select(Job.status, func.count(Job.id)).group_by(Job.status)
+        status_res = await db.execute(status_stmt)
+        status_map = {row[0].value if hasattr(row[0], 'value') else str(row[0]): row[1] for row in status_res.all()}
+    except Exception:
+        pass
 
     total_jobs = sum(status_map.values())
     pending_jobs = status_map.get("PENDING", 0)
@@ -51,18 +59,24 @@ async def get_overview_metrics(
     retrying_jobs = status_map.get("RETRYING", 0)
     dead_letter_jobs = status_map.get("DEAD_LETTER", 0)
 
-    # 2. Worker health query
-    worker_stmt = select(Worker.status, func.count(Worker.id)).group_by(Worker.status)
-    worker_res = await db.execute(worker_stmt)
-    worker_map = {row[0].value if hasattr(row[0], 'value') else str(row[0]): row[1] for row in worker_res.all()}
+    try:
+        # 2. Worker health query
+        worker_stmt = select(Worker.status, func.count(Worker.id)).group_by(Worker.status)
+        worker_res = await db.execute(worker_stmt)
+        worker_map = {row[0].value if hasattr(row[0], 'value') else str(row[0]): row[1] for row in worker_res.all()}
+    except Exception:
+        pass
 
     active_workers = worker_map.get("IDLE", 0) + worker_map.get("BUSY", 0)
     unhealthy_workers = worker_map.get("UNHEALTHY", 0)
 
-    # 3. Execution duration average
-    duration_stmt = select(func.avg(JobAttempt.execution_time_ms)).where(JobAttempt.status == JobStatus.SUCCESS)
-    dur_res = await db.execute(duration_stmt)
-    avg_dur = dur_res.scalar() or 0.0
+    try:
+        # 3. Execution duration average
+        duration_stmt = select(func.avg(JobAttempt.execution_time_ms)).where(JobAttempt.status == JobStatus.SUCCESS)
+        dur_res = await db.execute(duration_stmt)
+        avg_dur = dur_res.scalar() or 0.0
+    except Exception:
+        pass
 
     total_finished = success_jobs + failed_jobs + dead_letter_jobs
     success_rate = (success_jobs / total_finished * 100.0) if total_finished > 0 else 100.0
@@ -82,20 +96,20 @@ async def get_overview_metrics(
         success_rate_percent=round(success_rate, 1)
     )
 
-    # 4. Status distribution list
     status_distribution = [
         {"status": s, "count": count} for s, count in status_map.items()
     ]
 
-    # 5. Job Type distribution
-    type_stmt = select(Job.job_type, func.count(Job.id)).group_by(Job.job_type)
-    type_res = await db.execute(type_stmt)
-    type_distribution = [
-        {"job_type": row[0].value if hasattr(row[0], 'value') else str(row[0]), "count": row[1]}
-        for row in type_res.all()
-    ]
+    try:
+        type_stmt = select(Job.job_type, func.count(Job.id)).group_by(Job.job_type)
+        type_res = await db.execute(type_stmt)
+        type_distribution = [
+            {"job_type": row[0].value if hasattr(row[0], 'value') else str(row[0]), "count": row[1]}
+            for row in type_res.all()
+        ]
+    except Exception:
+        pass
 
-    # 6. Mock/Recent Throughput History for chart
     now = datetime.now(timezone.utc)
     throughput_history = [
         {

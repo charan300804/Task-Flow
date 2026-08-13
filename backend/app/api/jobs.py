@@ -12,7 +12,7 @@ from app.core.redis import get_redis
 from app.services.queue_service import QueueService
 from app.models import Job, JobAttempt, User, JobStatus, JobType
 from app.schemas.job import JobCreate, JobResponse, JobDetailResponse, JobListResponse
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, get_current_user_optional
 
 router = APIRouter(prefix="/api/jobs", tags=["Jobs"])
 
@@ -88,7 +88,7 @@ async def list_jobs(
     job_type: Optional[JobType] = Query(None),
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """Retrieve paginated list of submitted jobs with optional status/type filter."""
