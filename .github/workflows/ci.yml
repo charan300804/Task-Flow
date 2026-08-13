@@ -50,6 +50,7 @@ jobs:
 
       - name: Run Pytest suite
         env:
+          PYTHONPATH: backend
           POSTGRES_SERVER: localhost
           POSTGRES_PORT: 5432
           POSTGRES_USER: taskflow
@@ -75,5 +76,5 @@ jobs:
       - name: Install Frontend Dependencies & Build
         run: |
           cd frontend
-          npm ci
+          npm install
           npm run build
