@@ -1,0 +1,42 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Active Worker Nodes",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "taskflow_workers_active", "legendFormat": "Active Workers" }]
+    },
+    {
+      "title": "Total Jobs Submitted",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [{ "expr": "taskflow_jobs_submitted_total", "legendFormat": "Submitted" }]
+    },
+    {
+      "title": "Job Completion Throughput",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [{ "expr": "rate(taskflow_jobs_completed_total[1m])", "legendFormat": "{{status}}" }]
+    },
+    {
+      "title": "Queue Depths",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [{ "expr": "taskflow_queue_depth", "legendFormat": "{{queue_name}}" }]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["taskflow", "distributed-queue"],
+  "time": { "from": "now-30m", "to": "now" },
+  "title": "TaskFlow Cluster Metrics",
+  "version": 1
+}
